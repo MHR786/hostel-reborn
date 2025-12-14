@@ -47,17 +47,23 @@ export async function registerRoutes(
   httpServer: Server,
   app: Express
 ): Promise<Server> {
-
   // Auth Routes
   app.post("/api/auth/login", async (req, res) => {
     try {
       const parsed = loginSchema.safeParse(req.body);
       if (!parsed.success) {
-        return res.status(400).json({ message: "Invalid input", errors: parsed.error.errors });
+        return res
+          .status(400)
+          .json({ message: "Invalid input", errors: parsed.error.errors });
       }
       const { email, password } = parsed.data;
+
+      console.log(`[LOGIN ATTEMPT] Email: ${email}`); // DEBUG LOG
+
       const user = await storage.getUserByEmail(email);
+
       if (!user || user.password !== password) {
+        console.log(`[LOGIN FAILED] Invalid credentials for ${email}`); // DEBUG LOG
         return res.status(401).json({ message: "Invalid email or password" });
       }
       if (!user.isActive) {
@@ -67,6 +73,7 @@ export async function registerRoutes(
       const { password: _, ...userWithoutPassword } = user;
       res.json({ user: userWithoutPassword });
     } catch (error) {
+      console.error("[LOGIN ERROR DETAILS]:", error); // <--- THIS WAS MISSING
       res.status(500).json({ message: "Internal server error" });
     }
   });
@@ -112,7 +119,9 @@ export async function registerRoutes(
     try {
       const parsed = insertUserSchema.safeParse(req.body);
       if (!parsed.success) {
-        return res.status(400).json({ message: "Invalid input", errors: parsed.error.errors });
+        return res
+          .status(400)
+          .json({ message: "Invalid input", errors: parsed.error.errors });
       }
       const existing = await storage.getUserByEmail(parsed.data.email);
       if (existing) {
@@ -157,7 +166,9 @@ export async function registerRoutes(
   // Employees
   app.get("/api/employees", requireAdmin, async (req, res) => {
     const employees = await storage.getEmployees();
-    const employeesWithoutPasswords = employees.map(({ password: _, ...e }) => e);
+    const employeesWithoutPasswords = employees.map(
+      ({ password: _, ...e }) => e
+    );
     res.json(employeesWithoutPasswords);
   });
 
@@ -179,7 +190,9 @@ export async function registerRoutes(
     try {
       const parsed = insertBlockSchema.safeParse(req.body);
       if (!parsed.success) {
-        return res.status(400).json({ message: "Invalid input", errors: parsed.error.errors });
+        return res
+          .status(400)
+          .json({ message: "Invalid input", errors: parsed.error.errors });
       }
       const block = await storage.createBlock(parsed.data);
       res.status(201).json(block);
@@ -227,7 +240,9 @@ export async function registerRoutes(
     try {
       const parsed = insertRoomSchema.safeParse(req.body);
       if (!parsed.success) {
-        return res.status(400).json({ message: "Invalid input", errors: parsed.error.errors });
+        return res
+          .status(400)
+          .json({ message: "Invalid input", errors: parsed.error.errors });
       }
       const room = await storage.createRoom(parsed.data);
       res.status(201).json(room);
@@ -258,19 +273,27 @@ export async function registerRoutes(
     res.json(allocations);
   });
 
-  app.get("/api/seat-allocations/student/:studentId", requireAuth, async (req, res) => {
-    const allocation = await storage.getSeatAllocationByStudent(req.params.studentId);
-    if (!allocation) {
-      return res.status(404).json({ message: "Allocation not found" });
+  app.get(
+    "/api/seat-allocations/student/:studentId",
+    requireAuth,
+    async (req, res) => {
+      const allocation = await storage.getSeatAllocationByStudent(
+        req.params.studentId
+      );
+      if (!allocation) {
+        return res.status(404).json({ message: "Allocation not found" });
+      }
+      res.json(allocation);
     }
-    res.json(allocation);
-  });
+  );
 
   app.post("/api/seat-allocations", requireAdmin, async (req, res) => {
     try {
       const parsed = insertSeatAllocationSchema.safeParse(req.body);
       if (!parsed.success) {
-        return res.status(400).json({ message: "Invalid input", errors: parsed.error.errors });
+        return res
+          .status(400)
+          .json({ message: "Invalid input", errors: parsed.error.errors });
       }
       const allocation = await storage.createSeatAllocation(parsed.data);
       res.status(201).json(allocation);
@@ -280,7 +303,10 @@ export async function registerRoutes(
   });
 
   app.patch("/api/seat-allocations/:id", requireAdmin, async (req, res) => {
-    const allocation = await storage.updateSeatAllocation(req.params.id, req.body);
+    const allocation = await storage.updateSeatAllocation(
+      req.params.id,
+      req.body
+    );
     if (!allocation) {
       return res.status(404).json({ message: "Allocation not found" });
     }
@@ -318,7 +344,9 @@ export async function registerRoutes(
     try {
       const parsed = insertStudentPaymentSchema.safeParse(req.body);
       if (!parsed.success) {
-        return res.status(400).json({ message: "Invalid input", errors: parsed.error.errors });
+        return res
+          .status(400)
+          .json({ message: "Invalid input", errors: parsed.error.errors });
       }
       const payment = await storage.createStudentPayment(parsed.data);
       res.status(201).json(payment);
@@ -361,7 +389,9 @@ export async function registerRoutes(
     try {
       const parsed = insertVendorPaymentSchema.safeParse(req.body);
       if (!parsed.success) {
-        return res.status(400).json({ message: "Invalid input", errors: parsed.error.errors });
+        return res
+          .status(400)
+          .json({ message: "Invalid input", errors: parsed.error.errors });
       }
       const payment = await storage.createVendorPayment(parsed.data);
       res.status(201).json(payment);
@@ -404,7 +434,9 @@ export async function registerRoutes(
     try {
       const parsed = insertExpenseSchema.safeParse(req.body);
       if (!parsed.success) {
-        return res.status(400).json({ message: "Invalid input", errors: parsed.error.errors });
+        return res
+          .status(400)
+          .json({ message: "Invalid input", errors: parsed.error.errors });
       }
       const expense = await storage.createExpense(parsed.data);
       res.status(201).json(expense);
@@ -452,7 +484,9 @@ export async function registerRoutes(
     try {
       const parsed = insertSalarySchema.safeParse(req.body);
       if (!parsed.success) {
-        return res.status(400).json({ message: "Invalid input", errors: parsed.error.errors });
+        return res
+          .status(400)
+          .json({ message: "Invalid input", errors: parsed.error.errors });
       }
       const salary = await storage.createSalary(parsed.data);
       res.status(201).json(salary);
@@ -495,7 +529,9 @@ export async function registerRoutes(
     try {
       const parsed = insertMealRateSchema.safeParse(req.body);
       if (!parsed.success) {
-        return res.status(400).json({ message: "Invalid input", errors: parsed.error.errors });
+        return res
+          .status(400)
+          .json({ message: "Invalid input", errors: parsed.error.errors });
       }
       const mealRate = await storage.createMealRate(parsed.data);
       res.status(201).json(mealRate);
@@ -543,7 +579,9 @@ export async function registerRoutes(
     try {
       const parsed = insertMealRecordSchema.safeParse(req.body);
       if (!parsed.success) {
-        return res.status(400).json({ message: "Invalid input", errors: parsed.error.errors });
+        return res
+          .status(400)
+          .json({ message: "Invalid input", errors: parsed.error.errors });
       }
       const record = await storage.createMealRecord(parsed.data);
       res.status(201).json(record);
@@ -573,23 +611,25 @@ export async function registerRoutes(
     try {
       const { date, meals } = req.body;
       if (!date || !Array.isArray(meals)) {
-        return res.status(400).json({ message: "Invalid input: date and meals array required" });
+        return res
+          .status(400)
+          .json({ message: "Invalid input: date and meals array required" });
       }
-      
+
       // Fetch all meal records once to avoid repeated queries
       const allRecords = await storage.getMealRecords();
       const results = [];
-      
+
       for (const meal of meals) {
         const parsed = insertMealRecordSchema.safeParse({ ...meal, date });
         if (!parsed.success) {
           continue; // Skip invalid entries
         }
-        
+
         const existing = allRecords.find(
           (r) => r.studentId === meal.studentId && r.date === date
         );
-        
+
         if (existing) {
           const updated = await storage.updateMealRecord(existing.id, {
             breakfast: meal.breakfast ?? existing.breakfast,
@@ -627,7 +667,9 @@ export async function registerRoutes(
     try {
       const parsed = insertNoticeSchema.safeParse(req.body);
       if (!parsed.success) {
-        return res.status(400).json({ message: "Invalid input", errors: parsed.error.errors });
+        return res
+          .status(400)
+          .json({ message: "Invalid input", errors: parsed.error.errors });
       }
       const notice = await storage.createNotice(parsed.data);
       res.status(201).json(notice);
@@ -675,7 +717,9 @@ export async function registerRoutes(
     try {
       const parsed = insertComplaintSchema.safeParse(req.body);
       if (!parsed.success) {
-        return res.status(400).json({ message: "Invalid input", errors: parsed.error.errors });
+        return res
+          .status(400)
+          .json({ message: "Invalid input", errors: parsed.error.errors });
       }
       const complaint = await storage.createComplaint(parsed.data);
       res.status(201).json(complaint);
@@ -723,7 +767,9 @@ export async function registerRoutes(
     try {
       const parsed = insertAttendanceSchema.safeParse(req.body);
       if (!parsed.success) {
-        return res.status(400).json({ message: "Invalid input", errors: parsed.error.errors });
+        return res
+          .status(400)
+          .json({ message: "Invalid input", errors: parsed.error.errors });
       }
       const record = await storage.createAttendance(parsed.data);
       res.status(201).json(record);
@@ -766,7 +812,9 @@ export async function registerRoutes(
     try {
       const parsed = insertSystemConfigSchema.safeParse(req.body);
       if (!parsed.success) {
-        return res.status(400).json({ message: "Invalid input", errors: parsed.error.errors });
+        return res
+          .status(400)
+          .json({ message: "Invalid input", errors: parsed.error.errors });
       }
       const config = await storage.createSystemConfig(parsed.data);
       res.status(201).json(config);
@@ -801,10 +849,15 @@ export async function registerRoutes(
     const complaints = await storage.getComplaints();
     const notices = await storage.getNotices();
 
-    const totalCapacity = rooms.reduce((sum, room) => sum + (room.capacity || 0), 0);
-    const occupiedSeats = allocations.filter(a => a.isActive).length;
-    const openComplaints = complaints.filter(c => c.status === "OPEN" || c.status === "IN_PROGRESS").length;
-    const activeNotices = notices.filter(n => n.isActive).length;
+    const totalCapacity = rooms.reduce(
+      (sum, room) => sum + (room.capacity || 0),
+      0
+    );
+    const occupiedSeats = allocations.filter((a) => a.isActive).length;
+    const openComplaints = complaints.filter(
+      (c) => c.status === "OPEN" || c.status === "IN_PROGRESS"
+    ).length;
+    const activeNotices = notices.filter((n) => n.isActive).length;
 
     res.json({
       totalStudents: students.length,
@@ -814,7 +867,10 @@ export async function registerRoutes(
       totalCapacity,
       occupiedSeats,
       availableSeats: totalCapacity - occupiedSeats,
-      occupancyRate: totalCapacity > 0 ? Math.round((occupiedSeats / totalCapacity) * 100) : 0,
+      occupancyRate:
+        totalCapacity > 0
+          ? Math.round((occupiedSeats / totalCapacity) * 100)
+          : 0,
       openComplaints,
       activeNotices,
     });
