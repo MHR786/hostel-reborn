@@ -27,21 +27,43 @@ export default function StudentDashboard() {
   const { user } = useAuth();
 
   const { data: allocation, isLoading: allocationLoading } = useQuery<AllocationWithDetails>({
-    queryKey: ["/api/students", user?.id, "allocation"],
+    queryKey: ["/api/seat-allocations/student", user?.id],
+    queryFn: async ({ queryKey }) => {
+      const [, studentId] = queryKey;
+      if (!studentId) return null;
+      const res = await fetch(`/api/seat-allocations/student/${studentId}`, { credentials: 'include' });
+      return res.ok ? res.json() : null;
+    },
     enabled: !!user?.id,
   });
 
   const { data: payments = [], isLoading: paymentsLoading } = useQuery<StudentPayment[]>({
-    queryKey: ["/api/student-payments", { studentId: user?.id }],
+    queryKey: ["/api/student-payments", user?.id],
+    queryFn: async ({ queryKey }) => {
+      const [, studentId] = queryKey;
+      if (!studentId) return [];
+      const res = await fetch(`/api/student-payments?studentId=${studentId}`, { credentials: 'include' });
+      return res.json();
+    },
     enabled: !!user?.id,
   });
 
   const { data: notices = [], isLoading: noticesLoading } = useQuery<Notice[]>({
     queryKey: ["/api/notices"],
+    queryFn: async () => {
+      const res = await fetch('/api/notices', { credentials: 'include' });
+      return res.json();
+    },
   });
 
   const { data: mealRecords = [], isLoading: mealsLoading } = useQuery<MealRecord[]>({
-    queryKey: ["/api/meal-records", { studentId: user?.id }],
+    queryKey: ["/api/meal-records", user?.id],
+    queryFn: async ({ queryKey }) => {
+      const [, studentId] = queryKey;
+      if (!studentId) return [];
+      const res = await fetch(`/api/meal-records?studentId=${studentId}`, { credentials: 'include' });
+      return res.json();
+    },
     enabled: !!user?.id,
   });
 

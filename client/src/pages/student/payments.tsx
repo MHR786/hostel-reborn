@@ -20,7 +20,13 @@ export default function StudentPayments() {
   const { user } = useAuth();
 
   const { data: payments = [], isLoading } = useQuery<StudentPayment[]>({
-    queryKey: ["/api/student-payments", { studentId: user?.id }],
+    queryKey: ["/api/student-payments", user?.id],
+    queryFn: async ({ queryKey }) => {
+      const [, studentId] = queryKey;
+      if (!studentId) return [];
+      const res = await fetch(`/api/student-payments?studentId=${studentId}`, { credentials: 'include' });
+      return res.json();
+    },
     enabled: !!user?.id,
   });
 

@@ -32,9 +32,10 @@ export default function LoginPage() {
       const success = await login(data.email, data.password);
       if (success) {
         const res = await fetch("/api/auth/me", { credentials: "include" });
-        const user = await res.json();
+        const responseData = await res.json();
+        const userData = responseData.user;
         
-        if (user.role === "STUDENT") {
+        if (userData.role === "STUDENT") {
           navigate("/student");
         } else {
           navigate("/admin");
@@ -42,7 +43,7 @@ export default function LoginPage() {
         
         toast({
           title: "Welcome back!",
-          description: `Logged in as ${user.name}`,
+          description: `Logged in as ${userData.name}`,
         });
       } else {
         toast({

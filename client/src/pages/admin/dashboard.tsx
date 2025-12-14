@@ -11,14 +11,18 @@ interface DashboardStats {
   totalEmployees: number;
   totalStudents: number;
   totalRooms: number;
-  todayMeals: number;
-  occupiedRooms: number;
-  pendingPayments: number;
+  totalBlocks: number;
+  totalCapacity: number;
+  occupiedSeats: number;
+  availableSeats: number;
+  occupancyRate: number;
+  openComplaints: number;
+  activeNotices: number;
 }
 
 export default function AdminDashboard() {
   const { data: stats, isLoading: statsLoading } = useQuery<DashboardStats>({
-    queryKey: ["/api/admin/stats"],
+    queryKey: ["/api/stats/dashboard"],
   });
 
   const { data: notices, isLoading: noticesLoading } = useQuery<Notice[]>({
@@ -63,13 +67,13 @@ export default function AdminDashboard() {
               title="Total Rooms"
               value={stats?.totalRooms || 0}
               icon={BedDouble}
-              subtitle={`${stats?.occupiedRooms || 0} occupied`}
+              subtitle={`${stats?.occupiedSeats || 0} seats occupied`}
             />
             <StatsCard
-              title="Today's Meals"
-              value={stats?.todayMeals || 0}
+              title="Occupancy Rate"
+              value={`${stats?.occupancyRate || 0}%`}
               icon={Utensils}
-              subtitle="Meals served today"
+              subtitle={`${stats?.availableSeats || 0} available seats`}
             />
           </>
         )}
@@ -134,22 +138,16 @@ export default function AdminDashboard() {
           <CardContent>
             <div className="space-y-4">
               <div className="flex items-center justify-between p-3 rounded-lg bg-muted/30">
-                <span className="text-sm text-muted-foreground">Pending Payments</span>
-                <span className="text-lg font-semibold">{stats?.pendingPayments || 0}</span>
+                <span className="text-sm text-muted-foreground">Open Complaints</span>
+                <span className="text-lg font-semibold">{stats?.openComplaints || 0}</span>
               </div>
               <div className="flex items-center justify-between p-3 rounded-lg bg-muted/30">
-                <span className="text-sm text-muted-foreground">Room Occupancy</span>
-                <span className="text-lg font-semibold">
-                  {stats?.totalRooms
-                    ? Math.round((stats.occupiedRooms / stats.totalRooms) * 100)
-                    : 0}%
-                </span>
+                <span className="text-sm text-muted-foreground">Total Capacity</span>
+                <span className="text-lg font-semibold">{stats?.totalCapacity || 0} beds</span>
               </div>
               <div className="flex items-center justify-between p-3 rounded-lg bg-muted/30">
-                <span className="text-sm text-muted-foreground">Available Beds</span>
-                <span className="text-lg font-semibold">
-                  {(stats?.totalRooms || 0) - (stats?.occupiedRooms || 0)}
-                </span>
+                <span className="text-sm text-muted-foreground">Available Seats</span>
+                <span className="text-lg font-semibold">{stats?.availableSeats || 0}</span>
               </div>
               <div className="flex items-center justify-between p-3 rounded-lg bg-primary/10">
                 <span className="text-sm font-medium">Today</span>

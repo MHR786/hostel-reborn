@@ -25,7 +25,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const res = await fetch("/api/auth/me", { credentials: "include" });
       if (res.ok) {
         const data = await res.json();
-        setUser(data);
+        setUser(data.user);
       }
     } catch {
       setUser(null);
@@ -44,7 +44,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       });
       if (res.ok) {
         const data = await res.json();
-        setUser(data);
+        setUser(data.user);
         return true;
       }
       return false;
