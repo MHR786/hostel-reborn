@@ -12,6 +12,11 @@ if (!process.env.DATABASE_URL) {
 
 export const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
+  // FIX: Enable SSL for Render/Supabase connection
+  ssl:
+    process.env.NODE_ENV === "production"
+      ? { rejectUnauthorized: false }
+      : undefined,
 });
 
 export const db = drizzle(pool, { schema });
