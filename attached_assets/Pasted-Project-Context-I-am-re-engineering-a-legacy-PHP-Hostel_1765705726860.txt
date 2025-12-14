@@ -1,0 +1,122 @@
+Project Context: I am re-engineering a legacy PHP "Hostel Management System" into a modern full-stack application. Stack: Next.js 14 (App Router), TypeScript, Tailwind CSS, Prisma ORM, and SQLite (for local dev). Goal: Replicate the specific modules from the legacy system (shown in screenshots) but with modern architecture and RBAC (Role-Based Access Control).
+
+1. Data Model (Schema Engineering)
+Create a schema.prisma that supports the full legacy feature set. The schema must include:
+
+User & Auth: User model with name, email, password (hashed), image, and role (SUPER_ADMIN, ADMIN, EMPLOYEE, STUDENT).
+
+Hostel Infrastructure:
+
+Block: Represents buildings (e.g., Block A, Block B).
+
+Room: Linked to Block. Has roomNumber, capacity, type (AC/Non-AC).
+
+SeatAllocation: One-to-one link between Student and Room.
+
+Financials (Legacy Replication):
+
+StudentPayment: Tracks fees. Must include status (PENDING, APPROVED) to support the "Approval List" workflow.
+
+VendorPayment: Payment records to external suppliers.
+
+Expense: For general "Bill Manage" and "Cost Manage".
+
+Salary: Records of employee payroll payments (Month, Amount, Date).
+
+Mess Management:
+
+MealRate: Configurable daily/monthly rates.
+
+MealRecord: Tracks daily meals (Breakfast, Lunch, Dinner) per student.
+
+Communication & Ops:
+
+Notice: Title, content, date, visibility.
+
+Complaint: Student issues with status workflow.
+
+Attendance: Tracks daily presence for Students and Employees.
+
+System Settings:
+
+SystemConfig: Singleton or Key-Value store for global settings (e.g., Hostel Name, Currency, Time Sets/Curfew times).
+
+2. Authentication & Roles
+Login Flow: /login page that redirects based on role.
+
+Middleware: strict protection for Admin vs. Student routes.
+
+Seed Data (IMPORTANT): Please create a seed script (seed.ts) that populates the database with these exact users so I can test immediately:
+
+Admin: admin@hms.com / admin123
+
+Student: student@hms.com / student123
+
+3. Admin Dashboard (Full Legacy Migration)
+Implement a responsive Sidebar layout with the following specific modules (matching the legacy menus):
+
+A. Dashboard Home
+
+Stats Cards: Total Employees, Current Students, Total Rooms, Today's Meals.
+
+Widgets: "Top 4 Notices" and a Calendar view.
+
+B. Student Management
+
+Admission: Form to add students with photo upload.
+
+Seat Allocation: Interface to assign students to Blocks/Rooms.
+
+Student List: Searchable table of all students.
+
+C. Financial Management (Consolidated)
+
+Students Payment:
+
+Add Payment: Form to record fees.
+
+Approval List: A view for Admins to verify/approve pending online payments or drafts.
+
+Vendor Payment: CRUD for payments to vendors.
+
+Bill & Cost Manage: CRUD for operational expenses (Electricity, Internet, Repairs).
+
+D. Employee & Payroll
+
+Employee Manage: Add/Edit staff details.
+
+Salary: Two views: "Salary Add" (Issue payment) and "Salary View" (History).
+
+E. Mess & Attendance
+
+Meal Manage: Bulk interface to mark meals for students for the day.
+
+Attendance: Calendar-based interface to mark Present/Absent for students/staff.
+
+F. System Administration
+
+Notice Board: CRUD interface. Admins create notices; Students view them.
+
+Settings / Setup:
+
+Blocks: Manage building names.
+
+Fees & Meal Rate: Set global prices.
+
+Time Set: Configure hostel timings/shifts.
+
+4. Student Dashboard Features
+My Profile: View allocated Room, Block, and Bed.
+
+Notice Board: Read-only view of active notices.
+
+Payment History: View paid fees and outstanding dues.
+
+Complaints: Submit new complaints and track status.
+
+5. UI/UX Guidelines
+Design System: Use Tailwind CSS. Professional "Admin Panel" aesthetic (Blue/White/Gray palette).
+
+Components: Use Lucide React icons.
+
+Responsiveness: The Sidebar must be collapsible on mobile. Tables must scroll horizontally on small screens.
