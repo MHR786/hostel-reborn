@@ -12,7 +12,7 @@ import { registerRoutes } from "./routes";
 import { serveStatic } from "./static";
 import { createServer } from "http";
 
-const app = express();
+export const app = express();
 const httpServer = createServer(app);
 
 declare module "http" {
@@ -111,7 +111,15 @@ app.use((req, res, next) => {
   // ALWAYS serve the app on the port specified in the environment variable PORT
   // Other ports are firewalled. Default to 5000 if not specified.
   const port = parseInt(process.env.PORT || "5000", 10);
-  httpServer.listen(port, "0.0.0.0", () => {
-    log(`serving on port ${port}`);
-  });
+  // httpServer.listen(port, "0.0.0.0", () => {
+  //   log(`serving on port ${port}`);
+  // });
+  // FIX: Do not listen if running in Test environment (Vitest)
+  if (process.env.NODE_ENV !== "production" && process.env.NODE_ENV !== "test") {
+    const port = parseInt(process.env.PORT || "5000", 10);
+    httpServer.listen(port, "0.0.0.0", () => {
+      console.log(`Server running on port ${port}`);
+    });
+  }
+
 })();
